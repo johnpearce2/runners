@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <title>Mobile-Friendly QR Generator</title>
+  <title>QR Generator (Simplified)</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <script src="https://cdn.jsdelivr.net/npm/qrious@4.0.2/dist/qrious.min.js"></script>
   <style>
@@ -66,35 +66,18 @@
   <label for="surname">Surname</label>
   <input type="text" id="surname" required />
 
-  <label for="dob">D.O.B</label>
-  <input type="date" id="dob" required />
-
   <label for="gender">Gender</label>
   <select id="gender" required>
     <option value="">Select Gender...</option>
     <option>Male</option>
     <option>Female</option>
-    <option>Other</option>
-    <option>Prefer not to say</option>
   </select>
-
-  <label for="email">Email</label>
-  <input type="email" id="email" required />
-
-  <label for="phone">Phone Number</label>
-  <input type="tel" id="phone" required />
-
-  <label for="urn">EA URN</label>
-  <input type="text" id="urn" required />
-
-  <label for="emergency">Emergency Contact</label>
-  <input type="text" id="emergency" required />
 
   <label for="club">Running Club</label>
   <input type="text" id="club" required />
 
-  <label for="age">Age</label>
-  <input type="number" id="age" required />
+  <label for="age">Age (if under 16)</label>
+  <input type="number" id="age" min="0" placeholder="Optional" />
 
   <button type="button" onclick="generateQR()">Generate QR Code</button>
 </form>
@@ -106,32 +89,28 @@
 
 <script>
   function generateQR() {
-    const fields = [
-      document.getElementById('name').value.trim(),
-      document.getElementById('surname').value.trim(),
-      document.getElementById('dob').value,
-      document.getElementById('gender').value,
-      document.getElementById('email').value.trim(),
-      document.getElementById('phone').value.trim(),
-      document.getElementById('urn').value.trim(),
-      document.getElementById('emergency').value.trim(),
-      document.getElementById('club').value.trim(),
-      document.getElementById('age').value.trim()
-    ];
+    const name = document.getElementById('name').value.trim();
+    const surname = document.getElementById('surname').value.trim();
+    const gender = document.getElementById('gender').value;
+    const club = document.getElementById('club').value.trim();
+    const age = document.getElementById('age').value.trim();
 
-    const allFilled = fields.every(field => field !== "");
-
-    if (!allFilled) {
-      alert("Please complete all fields.");
+    if (!name || !surname || !gender || !club) {
+      alert("Please complete all required fields.");
       return;
     }
 
-    const data = fields.join('|');
+    const dataFields = [name, surname, gender, club];
+    if (age) {
+      dataFields.push(age);
+    }
+
+    const qrData = dataFields.join('|');
 
     const qr = new QRious({
       element: document.getElementById('qrCanvas'),
       size: 256,
-      value: data
+      value: qrData
     });
 
     document.getElementById('hint').style.display = 'block';
