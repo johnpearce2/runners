@@ -53,6 +53,14 @@
       color: #333;
       margin-top: 10px;
     }
+    #downloadBtn {
+      display: none;
+      background-color: #28a745;
+      margin-top: 10px;
+    }
+    #downloadBtn:hover {
+      background-color: #1e7e34;
+    }
   </style>
 </head>
 <body>
@@ -81,10 +89,13 @@
 
 <div id="qr">
   <canvas id="qrCanvas"></canvas>
-  <div id="hint" style="display:none;">📸 Screenshot your QR code to save it</div>
+  <div id="hint" style="display:none;">📸 Hold on the QR code to save it to Photos</div>
+  <button id="downloadBtn" onclick="downloadQR()">Download QR Code</button>
 </div>
 
 <script>
+  let currentRunId = '';
+
   function generateQR() {
     const fullname = document.getElementById('fullname').value.trim();
     const gender = document.getElementById('gender').value;
@@ -96,7 +107,6 @@
       return;
     }
 
-    // Ensure age is included even if blank
     let data = [fullname, gender, age || "", club];
 
     const qr = new QRious({
@@ -105,7 +115,23 @@
       value: data.join('|')
     });
 
+    // Generate a random Run ID for the filename
+    currentRunId = Math.floor(Math.random() * 1000000);
+
     document.getElementById('hint').style.display = 'block';
+    document.getElementById('downloadBtn').style.display = 'block';
+  }
+
+  function downloadQR() {
+    const canvas = document.getElementById('qrCanvas');
+    const link = document.createElement('a');
+    link.href = canvas.toDataURL('image/png');
+    link.download = `run-${currentRunId}.png`;
+    link.click();
+
+    setTimeout(() => {
+      alert("✅ Your QR Code was downloaded!\nCheck your Photos or Files.");
+    }, 500);
   }
 </script>
 
