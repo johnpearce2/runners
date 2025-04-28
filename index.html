@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <title>QR Code Generator</title>
+  <title>QR Code Generator with Running ID</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <script src="https://cdn.jsdelivr.net/npm/qrious@4.0.2/dist/qrious.min.js"></script>
   <style>
@@ -49,12 +49,6 @@
       color: #333;
       margin-top: 10px;
     }
-    #label {
-      font-weight: bold;
-      margin-bottom: 5px;
-      font-size: 18px;
-      color: #000;
-    }
   </style>
 </head>
 <body>
@@ -82,49 +76,63 @@
 </form>
 
 <div id="qr">
-  <!-- Label and QR will appear here -->
+  <!-- Full canvas with text + QR will be drawn here -->
 </div>
 
 <div id="hint" style="display:none;">📸 Tap and hold the QR code to save it to your Photos.</div>
 
 <script>
-  function generateQR() {
-    const fullname = document.getElementById('fullname').value.trim();
-    const gender = document.getElementById('gender').value;
-    const age = document.getElementById('age').value.trim();
-    const club = document.getElementById('club').value.trim();
+function generateQR() {
+  const fullname = document.getElementById('fullname').value.trim();
+  const gender = document.getElementById('gender').value;
+  const age = document.getElementById('age').value.trim();
+  const club = document.getElementById('club').value.trim();
 
-    if (!fullname || !gender || !club) {
-      alert("Please complete all required fields except age.");
-      return;
-    }
+  if (!fullname || !gender || !club) {
+    alert("Please complete all required fields except age.");
+    return;
+  }
 
-    let data = [fullname, gender, age || "", club];
+  const data = [fullname, gender, age || "", club].join('|');
 
-    const qr = new QRious({
-      size: 256,
-      value: data.join('|')
-    });
+  // Generate the QR code
+  const qr = new QRious({
+    size: 256,
+    value: data
+  });
 
+  // Create a combined canvas (text + QR)
+  const canvas = document.createElement('canvas');
+  const ctx = canvas.getContext('2d');
+
+  // Set canvas size: a bit bigger than QR for the text
+  canvas.width = 300;
+  canvas.height = 320;
+
+  // Draw white background
+  ctx.fillStyle = '#ffffff';
+  ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+  // Draw Running ID text
+  ctx.fillStyle = '#000000';
+  ctx.font = '20px Arial';
+  ctx.textAlign = 'center';
+  ctx.fillText('Running ID', canvas.width / 2, 30);
+
+  // Draw QR image onto canvas
+  const qrImage = new Image();
+  qrImage.onload = function() {
+    ctx.drawImage(qrImage, (canvas.width - 256) / 2, 50, 256, 256);
+
+    // Display the final canvas
     const qrDiv = document.getElementById('qr');
-    qrDiv.innerHTML = ""; // Clear previous QR if any
-
-    // Create a fixed label
-    const label = document.createElement('div');
-    label.id = 'label';
-    label.innerText = "Running ID"; // Fixed label
-
-    // Create image element
-    const img = document.createElement('img');
-    img.src = qr.toDataURL('image/png');
-    img.alt = "Generated QR Code";
-    img.style.maxWidth = "100%";
-
-    qrDiv.appendChild(label);
-    qrDiv.appendChild(img);
+    qrDiv.innerHTML = ""; // Clear previous QR
+    qrDiv.appendChild(canvas);
 
     document.getElementById('hint').style.display = 'block';
-  }
+  };
+  qrImage.src = qr.toDataURL('image/png');
+}
 </script>
 
 </body>
