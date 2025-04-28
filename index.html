@@ -43,10 +43,6 @@
       text-align: center;
       margin-top: 20px;
     }
-    #qr canvas {
-      margin-top: 10px;
-      max-width: 100%;
-    }
     #hint {
       text-align: center;
       font-size: 14px;
@@ -88,14 +84,12 @@
 </form>
 
 <div id="qr">
-  <canvas id="qrCanvas"></canvas>
-  <div id="hint" style="display:none;">📸 Hold on the QR code to save it to Photos</div>
-  <button id="downloadBtn" onclick="downloadQR()">Download QR Code</button>
+  <!-- QR will be inserted here -->
 </div>
 
-<script>
-  let currentRunId = '';
+<div id="hint" style="display:none;">📸 Tap and hold the QR code to save it to your Photos.</div>
 
+<script>
   function generateQR() {
     const fullname = document.getElementById('fullname').value.trim();
     const gender = document.getElementById('gender').value;
@@ -107,31 +101,27 @@
       return;
     }
 
+    // Prepare the QR data
     let data = [fullname, gender, age || "", club];
 
+    // Create the QR on canvas first
     const qr = new QRious({
-      element: document.getElementById('qrCanvas'),
       size: 256,
       value: data.join('|')
     });
 
-    // Generate a random Run ID for the filename
-    currentRunId = Math.floor(Math.random() * 1000000);
+    // Now replace canvas with an IMG element
+    const qrDiv = document.getElementById('qr');
+    qrDiv.innerHTML = ""; // Clear previous QR if any
+
+    const img = document.createElement('img');
+    img.src = qr.toDataURL('image/png');
+    img.alt = "Generated QR Code";
+    img.style.maxWidth = "100%";
+
+    qrDiv.appendChild(img);
 
     document.getElementById('hint').style.display = 'block';
-    document.getElementById('downloadBtn').style.display = 'block';
-  }
-
-  function downloadQR() {
-    const canvas = document.getElementById('qrCanvas');
-    const link = document.createElement('a');
-    link.href = canvas.toDataURL('image/png');
-    link.download = `run-${currentRunId}.png`;
-    link.click();
-
-    setTimeout(() => {
-      alert("✅ Your QR Code was downloaded!\nCheck your Photos or Files.");
-    }, 500);
   }
 </script>
 
